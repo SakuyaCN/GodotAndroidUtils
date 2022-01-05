@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.sakuya.godot">
+<!--    <uses-sdk-->
+<!--        tools:overrideLibrary="com.taptap.sdk,com.tapsdk.bootstrap,com.tds.common">-->
+<!--    </uses-sdk>-->
     <application>
+        <activity
+            android:name=".activitys.WebActivity"
+            android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+            android:exported="true"
+            tools:targetApi="lollipop" />
+
         <meta-data
             android:name="org.godotengine.plugin.v1.GodotUtils"
             android:value="com.sakuya.godot.GodotMain" />
+
+        <receiver android:name="cn.leancloud.push.LCBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+            </intent-filter>
+        </receiver>
     </application>
+
 </manifest>
