@@ -2,52 +2,76 @@ package com.sakuya.godot.factory
 
 import android.app.Activity
 import android.util.Log
-import com.tapsdk.bootstrap.TapBootstrap
-import com.tds.common.models.TapRegionType
-import com.tds.common.entities.TapConfig
-import org.godotengine.godot.plugin.SignalInfo
 import android.widget.Toast
-import com.google.gson.Gson
-import com.sakuya.godot.entity.TapEntity
-import com.tapsdk.bootstrap.Callback
-
-import com.tapsdk.bootstrap.exceptions.TapError
-
-import com.tapsdk.bootstrap.account.TDSUser
-import com.tapsdk.bootstrap.account.TDSUser.loginWithTapTap
+import com.sakuya.godot.utils.DeviceInfoUtils
+import com.tapsdk.moment.TapMoment
+import com.tapsdk.moment.TapMoment.TapMomentCallback
+import org.godotengine.godot.plugin.SignalInfo
 import com.taptap.sdk.*
-import java.lang.ref.WeakReference
 import com.taptap.sdk.TapLoginHelper.TapLoginResultCallback
-
+import com.tds.tapdb.sdk.TapDB
 
 class TapSdkFactory {
 
     private val TAG: String = "TapSdk"
-    private var activity:WeakReference<Activity> ?= null
 
-    fun create(context: Activity,client_id:String,your_client_token:String){
-        activity = WeakReference(context)
-        TapLoginHelper.init(context, client_id)
-        val config = LoginSdkConfig();
-        config.regionType = RegionType.CN
-        TapLoginHelper.init(context, client_id, config)
-        TapLoginHelper.registerLoginCallback(loginCallback)
+    fun create(activity:Activity,client_id:String,your_client_token:String,web_url:String = "y18canec.cloud.tds1.tapapis.cn"){
+        Log.e("TapFactory","client_id :${client_id} token : $your_client_token")
+        if(!Factory.isTapInit){
+            TapLoginHelper.init(activity, client_id)
+            TapMoment.init(activity, client_id)
+            TapDB.init(activity, client_id, "taptap", DeviceInfoUtils.getVersionName(activity), true)
+            TapLoginHelper.registerLoginCallback(loginCallback)
+            TapMoment.setCallback { code, msg ->
+                Factory.emitInterface?.onEmitOtherListener("OnTapMomentCallBack",code,msg)
+            }
+            Factory.isTapInit = true
+        }else{
+            activity.runOnUiThread { Toast.makeText(activity,"已初始化SDK",Toast.LENGTH_SHORT).show() }
+        }
     }
 
     //TapTap登录
-    private fun tapLogin(){
-        if (activity == null){
-            Log.e("TapFactory","未初始化TapSdk")
+    private fun tapLogin(activity: Activity){
+        if(!Factory.isTapInit){
+            activity.runOnUiThread { Toast.makeText(activity,"未初始化SDK",Toast.LENGTH_SHORT).show() }
             return
         }
-        TapLoginHelper.startTapLogin(activity!!.get(), TapLoginHelper.SCOPE_PUBLIC_PROFILE)
+        TapLoginHelper.startTapLogin(activity, TapLoginHelper.SCOPE_PUBLIC_PROFILE)
+    }
+
+    //登出
+    private fun tapLogout(activity: Activity){
+        if(!Factory.isTapInit){
+            activity.runOnUiThread { Toast.makeText(activity,"未初始化SDK",Toast.LENGTH_SHORT).show() }
+            return
+        }
+        TapLoginHelper.logout()
+    }
+
+    //获取Token
+    private fun tapAccessToken(activity: Activity){
+        if(!Factory.isTapInit){
+            activity.runOnUiThread { Toast.makeText(activity,"未初始化SDK",Toast.LENGTH_SHORT).show() }
+            return
+        }
+        Factory.emitInterface?.onEmitListener("OnTapLoginAccessToken",TapLoginHelper.getCurrentAccessToken().toJsonString())
+    }
+
+    //打开动态页面
+    private fun tapOpenMoment(activity: Activity){
+        if(!Factory.isTapInit){
+            activity.runOnUiThread { Toast.makeText(activity,"未初始化SDK",Toast.LENGTH_SHORT).show() }
+            return
+        }
+        TapMoment.open(TapMoment.ORIENTATION_SENSOR)
     }
 
     var loginCallback: TapLoginResultCallback = object : TapLoginResultCallback {
         override fun onLoginSuccess(token: AccessToken) {
-            Log.d(TAG, "TapTap authorization succeed")
-            // 开发者调用 TapLoginHelper.getCurrentProfile() 可以获得当前用户的一些基本信息，例如名称、头像。
             val profile: Profile = TapLoginHelper.getCurrentProfile()
+            Factory.emitInterface?.onEmitListener("OnTapLoginResult",profile.toJsonString())
+            Log.d(TAG, "TapTap authorization succeed :"+ profile.toJsonString())
         }
 
         override fun onLoginCancel() {
@@ -61,10 +85,17 @@ class TapSdkFactory {
 
     fun getPluginMethods():HashMap<String,String>{
         return hashMapOf(
-            this::tapLogin.name to this.javaClass.name)
+            this::tapLogin.name to this.javaClass.name,
+            this::tapLogout.name to this.javaClass.name,
+            this::tapAccessToken.name to this.javaClass.name,
+            this::tapOpenMoment.name to this.javaClass.name)
     }
 
     fun getPluginSignals():MutableSet<SignalInfo> {
-        return mutableSetOf(SignalInfo("OnTapLoginResult",String::class.java))
+
+        return mutableSetOf(
+            SignalInfo("OnTapLoginResult",String::class.java),
+            SignalInfo("OnTapLoginAccessToken",String::class.java),
+            SignalInfo("OnTapMomentCallBack",Integer::class.java,String::class.java))
     }
 }

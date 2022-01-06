@@ -6,14 +6,25 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.google.gson.Gson
 import com.sakuya.godot.activitys.WebActivity
 import com.sakuya.godot.factory.Factory
 import com.sakuya.godot.factory.TapSdkFactory
 import com.taptap.sdk.TapLoginHelper
+import com.tds.tapdb.sdk.TapDB
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
 import org.godotengine.godot.plugin.SignalInfo
+import org.json.JSONObject
+import java.lang.ref.WeakReference
 import java.lang.reflect.Method
+import com.google.gson.JsonParser
+
+import com.google.gson.JsonObject
+import com.sakuya.godot.factory.Factory.ALBUM_CODE
+import com.sakuya.godot.utils.Utils
+import org.slf4j.helpers.Util
+
 
 class GodotMain(godot: Godot) :GodotPlugin(godot),Factory.EmitInterface {
 
@@ -31,8 +42,10 @@ class GodotMain(godot: Godot) :GodotPlugin(godot),Factory.EmitInterface {
     }
 
     override fun onMainCreate(activity: Activity?): View? {
-        Factory.godotPlugin = this
+        Factory.activity = WeakReference(activity)
         Log.e(pluginName,"加载成功")
+
+
         return super.onMainCreate(activity)
     }
 
@@ -41,7 +54,7 @@ class GodotMain(godot: Godot) :GodotPlugin(godot),Factory.EmitInterface {
     }
 
     override fun getPluginMethods(): MutableList<String> {
-        return mutableListOf("getMethods","showToast","openWebView","tapInit")
+        return mutableListOf("getMethods","showToast","openWebView","tapInit","tapTrackEvent")
     }
 
     override fun getPluginSignals(): MutableSet<SignalInfo> {
@@ -51,9 +64,9 @@ class GodotMain(godot: Godot) :GodotPlugin(godot),Factory.EmitInterface {
     fun getMethods(method:String){
         val c = Class.forName(methodMap[method])
         val obj: Any = c.newInstance()
-        val m1: Method = c.getDeclaredMethod(method)
+        val m1: Method = c.getDeclaredMethod(method,Activity::class.java)
         m1.isAccessible = true
-        m1.invoke(obj)
+        m1.invoke(obj,activity)
     }
 
     @SuppressLint("WrongConstant")
@@ -75,7 +88,32 @@ class GodotMain(godot: Godot) :GodotPlugin(godot),Factory.EmitInterface {
         Factory.tapSdkFactory.create(activity!!,c_id,c_token)
     }
 
+    //自定义事件
+    fun tapTrackEvent(event:String,json: String){
+        if(!Factory.isTapInit){
+            runOnUiThread { Toast.makeText(activity,"未初始化SDK",Toast.LENGTH_SHORT).show() }
+            return
+        }
+        TapDB.trackEvent(event,JSONObject(json))
+    }
+
     override fun onEmitListener(name: String,signalArgs: Any?) {
         emitSignal(name,signalArgs)
+    }
+
+    override fun onEmitOtherListener(name: String, code: Int, msg: String) {
+        emitSignal(name,code,msg)
+    }
+
+    override fun onMainActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onMainActivityResult(requestCode, resultCode, data)
+        if(resultCode == Activity.RESULT_OK){
+            when(requestCode){
+                ALBUM_CODE->{
+                    val path = Utils.uriToFile(data!!.data, activity).absolutePath
+                    emitSignal("AlbumResult",path)
+                }
+            }
+        }
     }
 }

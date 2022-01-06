@@ -56,6 +56,8 @@ dependencies {
     embed (name:'TapLogin_3.5.1', ext:'aar')
     embed (name:'TapBootstrap_3.5.1', ext:'aar')
     embed (name:'TapCommon_3.5.1', ext:'aar')
+    embed (name:'TapMoment_3.5.1', ext:'aar')
+    embed (name:'TapDB_3.5.1', ext:'aar')
     compileOnly 'cn.leancloud:realtime-android:8.2.0'
     compileOnly 'cn.leancloud:storage-android:8.2.0'
     compileOnly 'io.reactivex.rxjava2:rxandroid:2.1.1'

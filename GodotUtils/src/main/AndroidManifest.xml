@@ -5,7 +5,8 @@
 <!--    <uses-sdk-->
 <!--        tools:overrideLibrary="com.taptap.sdk,com.tapsdk.bootstrap,com.tds.common">-->
 <!--    </uses-sdk>-->
-    <application>
+    <application
+        android:name=".app">
         <activity
             android:name=".activitys.WebActivity"
             android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
@@ -24,6 +25,18 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.leqi.ciweihx.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+            <!-- <meta-data -->
+            <!-- android:name="android.support.FILE_PROVIDER_PATHS" -->
+            <!-- android:resource="@xml/gdt_file_path" /> -->
+        </provider>
     </application>
 
 </manifest>
