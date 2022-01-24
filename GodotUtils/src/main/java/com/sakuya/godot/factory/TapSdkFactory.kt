@@ -109,7 +109,8 @@ class TapSdkFactory {
             this::tapLogin.name to this.javaClass.name,
             this::tapLogout.name to this.javaClass.name,
             this::tapAccessToken.name to this.javaClass.name,
-            this::tapOpenMoment.name to this.javaClass.name)
+            this::tapOpenMoment.name to this.javaClass.name,
+            this::getTestQualification.name to this.javaClass.name)
     }
 
     fun getPluginSignals():MutableSet<SignalInfo> {
