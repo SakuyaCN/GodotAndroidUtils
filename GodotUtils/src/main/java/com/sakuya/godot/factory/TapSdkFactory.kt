@@ -9,6 +9,7 @@ import com.tapsdk.moment.TapMoment.TapMomentCallback
 import org.godotengine.godot.plugin.SignalInfo
 import com.taptap.sdk.*
 import com.taptap.sdk.TapLoginHelper.TapLoginResultCallback
+import com.taptap.sdk.net.Api
 import com.tds.tapdb.sdk.TapDB
 
 class TapSdkFactory {
@@ -58,6 +59,24 @@ class TapSdkFactory {
         Factory.emitInterface?.onEmitListener("OnTapLoginAccessToken",TapLoginHelper.getCurrentAccessToken().toJsonString())
     }
 
+    //TapTap篝火计划资格
+    private fun getTestQualification(activity: Activity){
+        if(!Factory.isTapInit){
+            activity.runOnUiThread { Toast.makeText(activity,"未初始化SDK",Toast.LENGTH_SHORT).show() }
+            return
+        }
+        TapLoginHelper.getTestQualification(object : Api.ApiCallback<Boolean>{
+            override fun onSuccess(p0: Boolean?) {
+                Factory.emitInterface?.onEmitListener("OnTestQualificationResult",p0)
+            }
+
+            override fun onError(p0: Throwable?) {
+                Factory.emitInterface?.onEmitListener("OnTestQualificationResult",false)
+            }
+
+        })
+    }
+
     //打开动态页面
     private fun tapOpenMoment(activity: Activity){
         if(!Factory.isTapInit){
@@ -75,10 +94,12 @@ class TapSdkFactory {
         }
 
         override fun onLoginCancel() {
+            Factory.emitInterface?.onEmitListener("OnTapLoginResult","")
             Log.d(TAG, "TapTap authorization cancelled")
         }
 
         override fun onLoginError(globalError: AccountGlobalError) {
+            Factory.emitInterface?.onEmitListener("OnTapLoginResult","")
             Log.d(TAG, "TapTap authorization failed. cause: " + globalError.message)
         }
     }
@@ -94,6 +115,7 @@ class TapSdkFactory {
     fun getPluginSignals():MutableSet<SignalInfo> {
 
         return mutableSetOf(
+            SignalInfo("OnTestQualificationResult",Boolean::class.java),
             SignalInfo("OnTapLoginResult",String::class.java),
             SignalInfo("OnTapLoginAccessToken",String::class.java),
             SignalInfo("OnTapMomentCallBack",Integer::class.java,String::class.java))

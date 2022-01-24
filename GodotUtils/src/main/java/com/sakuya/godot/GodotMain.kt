@@ -44,8 +44,6 @@ class GodotMain(godot: Godot) :GodotPlugin(godot),Factory.EmitInterface {
     override fun onMainCreate(activity: Activity?): View? {
         Factory.activity = WeakReference(activity)
         Log.e(pluginName,"加载成功")
-
-
         return super.onMainCreate(activity)
     }
 
