@@ -6,11 +6,8 @@ import android.content.Intent
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import com.google.gson.Gson
 import com.sakuya.godot.activitys.WebActivity
 import com.sakuya.godot.factory.Factory
-import com.sakuya.godot.factory.TapSdkFactory
-import com.taptap.sdk.TapLoginHelper
 import com.tds.tapdb.sdk.TapDB
 import org.godotengine.godot.Godot
 import org.godotengine.godot.plugin.GodotPlugin
@@ -18,13 +15,8 @@ import org.godotengine.godot.plugin.SignalInfo
 import org.json.JSONObject
 import java.lang.ref.WeakReference
 import java.lang.reflect.Method
-import com.google.gson.JsonParser
-
-import com.google.gson.JsonObject
 import com.sakuya.godot.factory.Factory.ALBUM_CODE
 import com.sakuya.godot.utils.Utils
-import org.slf4j.helpers.Util
-
 
 class GodotMain(godot: Godot) :GodotPlugin(godot),Factory.EmitInterface {
 

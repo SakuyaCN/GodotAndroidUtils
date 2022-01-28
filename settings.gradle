@@ -1,14 +1,15 @@
-dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() // Warning: this repository is going to shut down soon
-        flatDir {
-            dirs 'GodotUtils/libs'
-        }
-    }
-}
+//dependencyResolutionManagement {
+//    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+//    repositories {
+//        google()
+//        mavenCentral()
+//        jcenter() // Warning: this repository is going to shut down soon
+////        flatDir {
+////            dirs 'GodotUtils/libs'
+////        }
+//    }
+//}
 rootProject.name = "GodotAndroidUtils"
 include ':app'
 include ':GodotUtils'
+include ':AntiAddiction'

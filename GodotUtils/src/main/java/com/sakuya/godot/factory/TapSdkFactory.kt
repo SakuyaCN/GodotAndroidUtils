@@ -56,7 +56,10 @@ class TapSdkFactory {
             activity.runOnUiThread { Toast.makeText(activity,"未初始化SDK",Toast.LENGTH_SHORT).show() }
             return
         }
-        Factory.emitInterface?.onEmitListener("OnTapLoginAccessToken",TapLoginHelper.getCurrentAccessToken().toJsonString())
+        if (TapLoginHelper.getCurrentAccessToken() != null)
+            Factory.emitInterface?.onEmitListener("OnTapLoginAccessToken",TapLoginHelper.getCurrentAccessToken().toJsonString())
+        else
+            Factory.emitInterface?.onEmitListener("OnTapLoginAccessToken","")
     }
 
     //TapTap篝火计划资格

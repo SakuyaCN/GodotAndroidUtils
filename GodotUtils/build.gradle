@@ -38,6 +38,20 @@ android {
             output.outputFileName = "GodotUtils.$pluginVersionName.${variant.name}.aar"
         }
     }
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    jcenter() // Warning: this repository is going to shut down soon
+    flatDir {
+        dirs 'GodotUtils/libs'
+    }
 }
 
 dependencies {
